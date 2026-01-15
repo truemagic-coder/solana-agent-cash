@@ -1,27 +1,127 @@
-# Express TypeScript App
+# Solana Agent Privacy Cash API
+
+Turn-key Express + TypeScript API for initiating a **private USDC transfer** using Privy wallet export and the Privacy Cash SDK.
+
+## What it does
+
+The API:
+
+1. Exports a Privy wallet private key using HPKE.
+2. Decrypts the export using your HPKE private key.
+3. Uses Privacy Cash SDK to deposit USDC into the private pool.
+4. Withdraws USDC to a recipient Solana public key.
+
+## Requirements
+
+- Node.js 20+
+- A Privy app with wallet export enabled
+- A Solana mainnet RPC URL
+- HPKE P‑256 keypair (DER SPKI public key + DER PKCS8 private key, base64)
+
+## Quick start
+
+1) Install dependencies
+
+```bash
+npm install
+```
+
+2) Configure environment
+
+Copy `.env.example` to `.env` and set the values:
+
+```text
+PORT=3000
+API_KEY=replace-me
+SOLANA_RPC_URL=https://your-solana-rpc
+PRIVY_APP_ID=your-privy-app-id
+PRIVY_APP_SECRET=your-privy-app-secret
+PRIVY_AUTH_SIGNATURE=
+PRIVY_HPKE_PUBLIC_KEY_B64=base64-der-spki-public-key
+PRIVY_HPKE_PRIVATE_KEY_B64=base64-der-pkcs8-private-key
+```
+
+3) Generate HPKE keys (optional)
+
+```bash
+npm run tsx scripts/generate-privy-hpke-keys.ts
+```
+
+4) Run locally
+
+```bash
+npm run dev
+```
+
+## API
+
+### Health check
+
+`GET /health`
+
+Response:
+
+```json
+{ "status": "ok" }
+```
+
+### Private USDC transfer
+
+`POST /private-transfer`
+
+Headers:
+
+- `Authorization: Bearer <API_KEY>` **or**
+- `x-api-key: <API_KEY>`
+
+Body:
+
+```json
+{
+	"walletId": "privy_wallet_id",
+	"amount": 1.25,
+	"recipient": "solana_public_key"
+}
+```
+
+Response (success):
+
+```json
+{
+	"status": "ok",
+	"deposit": { "...": "..." },
+	"withdraw": { "...": "..." }
+}
+```
 
 ## Scripts
 
 - `npm run dev` - start dev server with hot reload
-- `npm run build` - compile TypeScript to `dist/`
+- `npm run build` - compile TypeScript to dist/
 - `npm start` - run compiled server
 - `npm run lint` - lint source
 - `npm run format` - format source
+- `npm run test` - run tests
+- `npm run test:watch` - watch tests
 
-## Configuration
+## Tests
 
-Copy `.env.example` to `.env` and adjust as needed.
+Run all tests:
 
-## Secure private transfer
+```bash
+npm run test
+```
 
-POST `/private-transfer`
+## Deployment (Dokku)
 
-Request body:
+Ensure `.env` values are set in your Dokku config. A Procfile is included and runs:
 
-- `walletId` (string) Privy wallet ID
-- `amount` (number) USDC amount
-- `recipient` (string) Solana recipient public key
+```text
+web: npm run build && npm start
+```
 
-Auth:
+## Security notes
 
-- `Authorization: Bearer <API_KEY>` or `x-api-key: <API_KEY>`
+- Never commit `.env` or your HPKE private key.
+- Use a strong, unique `API_KEY` for the endpoint.
+- Restrict access to your Privy app credentials.

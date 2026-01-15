@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import { webcrypto } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { PublicKey } from '@solana/web3.js';
 import { PrivacyCash } from 'privacycash';
 import { CipherSuite, DhkemP256HkdfSha256, HkdfSha256 } from '@hpke/core';
 import { Chacha20Poly1305 } from '@hpke/chacha20poly1305';
 
-const app = express();
+export const app = express();
 
 app.use(express.json());
 
@@ -175,7 +176,10 @@ app.post('/private-transfer', requireApiKey, async (req, res) => {
 
 const port = Number(process.env.PORT) || 3000;
 
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on http://localhost:${port}`);
-});
+const isEntrypoint = process.argv[1] === fileURLToPath(import.meta.url);
+if (isEntrypoint) {
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Server listening on http://localhost:${port}`);
+  });
+}
