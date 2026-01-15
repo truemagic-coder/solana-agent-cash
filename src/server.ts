@@ -4,6 +4,7 @@ import { webcrypto } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { PublicKey } from '@solana/web3.js';
 import { PrivacyCash } from 'privacycash';
+import BigNumber from 'bignumber.js';
 import { CipherSuite, DhkemP256HkdfSha256, HkdfSha256 } from '@hpke/core';
 import { Chacha20Poly1305 } from '@hpke/chacha20poly1305';
 
@@ -12,6 +13,7 @@ export const app = express();
 app.use(express.json());
 
 const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const LAMPORTS_PER_SOL = 1_000_000_000;
 
 const apiKey = process.env.API_KEY;
 const privyAppId = process.env.PRIVY_APP_ID;
@@ -30,6 +32,23 @@ const normalizePemBase64 = (value: string, pemHeader: string) => {
   }
   return value;
 };
+
+type TokenSymbol = 'SOL' | 'USDC';
+
+const parseTokenSymbol = (raw?: string): TokenSymbol | null => {
+  if (!raw) return null;
+  const normalized = raw.toUpperCase();
+  if (normalized === 'SOL' || normalized === 'USDC') {
+    return normalized;
+  }
+  return null;
+};
+
+const toLamports = (amount: number) =>
+  new BigNumber(amount)
+    .multipliedBy(LAMPORTS_PER_SOL)
+    .integerValue(BigNumber.ROUND_HALF_UP)
+    .toNumber();
 
 function requireApiKey(req: express.Request, res: express.Response, next: express.NextFunction) {
   if (!apiKey) {
@@ -140,21 +159,26 @@ app.get('/health', (_req, res) => {
 
 app.post('/transfer', requireApiKey, async (req, res) => {
   try {
-    const { walletId, amount, recipient } = req.body as {
+    const { walletId, amount, recipient, token } = req.body as {
       walletId?: string;
       amount?: number;
       recipient?: string;
+      token?: string;
     };
 
-    if (!walletId || !recipient || typeof amount !== 'number') {
-      return res.status(400).json({ error: 'walletId, amount, recipient required' });
+    const tokenSymbol = parseTokenSymbol(token);
+
+    if (!walletId || !recipient || typeof amount !== 'number' || !tokenSymbol) {
+      return res
+        .status(400)
+        .json({ error: "walletId, amount, recipient, token ('SOL' | 'USDC') required" });
     }
 
     if (!solanaRpcUrl) {
       return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
     }
 
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       return res.status(400).json({ error: 'amount must be > 0' });
     }
 
@@ -168,16 +192,33 @@ app.post('/transfer', requireApiKey, async (req, res) => {
       owner: privateKey,
     });
 
-    const depositRes = await client.depositSPL({
-      amount,
-      mintAddress: USDC_MINT,
-    });
+    const recipientAddress = recipientKey.toBase58();
+    const isSol = tokenSymbol === 'SOL';
+    const lamports = isSol ? toLamports(amount) : 0;
 
-    const withdrawRes = await client.withdrawSPL({
-      amount,
-      mintAddress: USDC_MINT,
-      recipientAddress: recipientKey.toBase58(),
-    });
+    if (isSol && lamports <= 0) {
+      return res.status(400).json({ error: 'amount must be > 0' });
+    }
+
+    const depositRes = isSol
+      ? await client.deposit({
+          lamports,
+        })
+      : await client.depositSPL({
+          amount,
+          mintAddress: USDC_MINT,
+        });
+
+    const withdrawRes = isSol
+      ? await client.withdraw({
+          lamports,
+          recipientAddress,
+        })
+      : await client.withdrawSPL({
+          amount,
+          mintAddress: USDC_MINT,
+          recipientAddress,
+        });
 
     return res.json({
       status: 'ok',
@@ -192,20 +233,25 @@ app.post('/transfer', requireApiKey, async (req, res) => {
 
 app.post('/deposit', requireApiKey, async (req, res) => {
   try {
-    const { walletId, amount } = req.body as {
+    const { walletId, amount, token } = req.body as {
       walletId?: string;
       amount?: number;
+      token?: string;
     };
 
-    if (!walletId || typeof amount !== 'number') {
-      return res.status(400).json({ error: 'walletId, amount required' });
+    const tokenSymbol = parseTokenSymbol(token);
+
+    if (!walletId || typeof amount !== 'number' || !tokenSymbol) {
+      return res
+        .status(400)
+        .json({ error: "walletId, amount, token ('SOL' | 'USDC') required" });
     }
 
     if (!solanaRpcUrl) {
       return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
     }
 
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       return res.status(400).json({ error: 'amount must be > 0' });
     }
 
@@ -217,10 +263,21 @@ app.post('/deposit', requireApiKey, async (req, res) => {
       owner: privateKey,
     });
 
-    const depositRes = await client.depositSPL({
-      amount,
-      mintAddress: USDC_MINT,
-    });
+    const isSol = tokenSymbol === 'SOL';
+    const lamports = isSol ? toLamports(amount) : 0;
+
+    if (isSol && lamports <= 0) {
+      return res.status(400).json({ error: 'amount must be > 0' });
+    }
+
+    const depositRes = isSol
+      ? await client.deposit({
+          lamports,
+        })
+      : await client.depositSPL({
+          amount,
+          mintAddress: USDC_MINT,
+        });
 
     return res.json({
       status: 'ok',
@@ -234,21 +291,26 @@ app.post('/deposit', requireApiKey, async (req, res) => {
 
 app.post('/withdrawl', requireApiKey, async (req, res) => {
   try {
-    const { walletId, amount, recipient } = req.body as {
+    const { walletId, amount, recipient, token } = req.body as {
       walletId?: string;
       amount?: number;
       recipient?: string;
+      token?: string;
     };
 
-    if (!walletId || !recipient || typeof amount !== 'number') {
-      return res.status(400).json({ error: 'walletId, amount, recipient required' });
+    const tokenSymbol = parseTokenSymbol(token);
+
+    if (!walletId || !recipient || typeof amount !== 'number' || !tokenSymbol) {
+      return res
+        .status(400)
+        .json({ error: "walletId, amount, recipient, token ('SOL' | 'USDC') required" });
     }
 
     if (!solanaRpcUrl) {
       return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
     }
 
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       return res.status(400).json({ error: 'amount must be > 0' });
     }
 
@@ -262,11 +324,24 @@ app.post('/withdrawl', requireApiKey, async (req, res) => {
       owner: privateKey,
     });
 
-    const withdrawRes = await client.withdrawSPL({
-      amount,
-      mintAddress: USDC_MINT,
-      recipientAddress: recipientKey.toBase58(),
-    });
+    const recipientAddress = recipientKey.toBase58();
+    const isSol = tokenSymbol === 'SOL';
+    const lamports = isSol ? toLamports(amount) : 0;
+
+    if (isSol && lamports <= 0) {
+      return res.status(400).json({ error: 'amount must be > 0' });
+    }
+
+    const withdrawRes = isSol
+      ? await client.withdraw({
+          lamports,
+          recipientAddress,
+        })
+      : await client.withdrawSPL({
+          amount,
+          mintAddress: USDC_MINT,
+          recipientAddress,
+        });
 
     return res.json({
       status: 'ok',
@@ -280,12 +355,15 @@ app.post('/withdrawl', requireApiKey, async (req, res) => {
 
 app.post('/balance', requireApiKey, async (req, res) => {
   try {
-    const { walletId } = req.body as {
+    const { walletId, token } = req.body as {
       walletId?: string;
+      token?: string;
     };
 
-    if (!walletId) {
-      return res.status(400).json({ error: 'walletId required' });
+    const tokenSymbol = parseTokenSymbol(token);
+
+    if (!walletId || !tokenSymbol) {
+      return res.status(400).json({ error: "walletId, token ('SOL' | 'USDC') required" });
     }
 
     if (!solanaRpcUrl) {
@@ -300,7 +378,10 @@ app.post('/balance', requireApiKey, async (req, res) => {
       owner: privateKey,
     });
 
-    const balance = await client.getPrivateBalanceSpl(USDC_MINT);
+    const balance =
+      tokenSymbol === 'SOL'
+        ? await client.getPrivateBalance()
+        : await client.getPrivateBalanceSpl(USDC_MINT);
 
     return res.json({
       status: 'ok',

@@ -16,6 +16,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "privacycash": "^1.1.10",
+    "bignumber.js": "^9.1.2",
     "@hpke/chacha20poly1305": "^1.7.1",
     "@hpke/core": "^1.7.5",
     "@solana/web3.js": "^1.98.0"

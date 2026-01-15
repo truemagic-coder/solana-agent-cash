@@ -62,7 +62,7 @@ Response:
 { "status": "ok" }
 ```
 
-### Transfer USDC
+### Transfer (SOL or USDC)
 
 `POST /transfer`
 
@@ -76,6 +76,7 @@ Body:
 ```json
 {
 	"walletId": "privy_wallet_id",
+	"token": "USDC",
 	"amount": 1.25,
 	"recipient": "solana_public_key"
 }
@@ -91,11 +92,13 @@ Response (success):
 }
 ```
 
-Notes: 
+Notes:
 
+* Set `token` to `SOL` or `USDC`.
+* `amount` is in SOL or USDC (not lamports).
 * Privacy Cash charges 0.25% for withdrawls (happens in transfer)
 
-### Deposit USDC
+### Deposit (SOL or USDC)
 
 `POST /deposit`
 
@@ -109,6 +112,7 @@ Body:
 ```json
 {
 	"walletId": "privy_wallet_id",
+	"token": "USDC",
 	"amount": 1.25
 }
 ```
@@ -122,7 +126,7 @@ Response (success):
 }
 ```
 
-### Withdraw USDC
+### Withdraw (SOL or USDC)
 
 `POST /withdrawl`
 
@@ -136,13 +140,16 @@ Body:
 ```json
 {
 	"walletId": "privy_wallet_id",
+	"token": "USDC",
 	"amount": 1.25,
 	"recipient": "solana_public_key"
 }
 ```
 
-Notes: 
+Notes:
 
+* Set `token` to `SOL` or `USDC`.
+* `amount` is in SOL or USDC (not lamports).
 * Privacy Cash charges 0.25% for withdrawls
 
 Response (success):
@@ -154,7 +161,7 @@ Response (success):
 }
 ```
 
-### USDC private balance
+### Private balance (SOL or USDC)
 
 `POST /balance`
 
@@ -167,7 +174,8 @@ Body:
 
 ```json
 {
-	"walletId": "privy_wallet_id"
+	"walletId": "privy_wallet_id",
+	"token": "USDC"
 }
 ```
 
