@@ -44,7 +44,7 @@ PRIVY_HPKE_PRIVATE_KEY_B64=base64-der-pkcs8-private-key
 3) Generate HPKE keys (optional)
 
 ```bash
-npm run tsx scripts/generate-privy-hpke-keys.ts
+node scripts/generate-privy-hpke-keys.js
 ```
 
 4) Run locally
