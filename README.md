@@ -47,6 +47,12 @@ PRIVY_HPKE_PRIVATE_KEY_B64=base64-der-pkcs8-private-key
 node scripts/generate-privy-hpke-keys.js
 ```
 
+Notes on HPKE key formats:
+
+- Recommended: base64 of DER SPKI public key and DER PKCS8 private key.
+- The generator also prints base64 of PEM for compatibility with Privy’s demo.
+- The server accepts either format and normalizes to DER internally.
+
 4) Run locally
 
 ```bash

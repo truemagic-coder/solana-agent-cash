@@ -21,6 +21,16 @@ const privyHpkePublicKeyB64 = process.env.PRIVY_HPKE_PUBLIC_KEY_B64;
 const privyHpkePrivateKeyB64 = process.env.PRIVY_HPKE_PRIVATE_KEY_B64;
 const solanaRpcUrl = process.env.SOLANA_RPC_URL;
 
+const pemBodyRegex = /-----BEGIN [^-]+-----|-----END [^-]+-----|\s+/g;
+
+const normalizePemBase64 = (value: string, pemHeader: string) => {
+  const decoded = Buffer.from(value, 'base64').toString('utf8');
+  if (decoded.includes(pemHeader)) {
+    return decoded.replace(pemBodyRegex, '');
+  }
+  return value;
+};
+
 function requireApiKey(req: express.Request, res: express.Response, next: express.NextFunction) {
   if (!apiKey) {
     return res.status(500).json({ error: 'API key not configured' });
@@ -50,7 +60,8 @@ async function decryptPrivyWalletPrivateKey(exportPayload: {
     aead: new Chacha20Poly1305(),
   });
 
-  const privateKeyDer = Buffer.from(privyHpkePrivateKeyB64, 'base64');
+  const privateKeyDerBase64 = normalizePemBase64(privyHpkePrivateKeyB64, 'BEGIN PRIVATE KEY');
+  const privateKeyDer = Buffer.from(privateKeyDerBase64, 'base64');
   const recipientKey = await webcrypto.subtle.importKey(
     'pkcs8',
     privateKeyDer,
@@ -79,6 +90,11 @@ async function exportPrivyWallet(walletId: string) {
     throw new Error('Privy export not configured');
   }
 
+  const recipientPublicKeyDerBase64 = normalizePemBase64(
+    privyHpkePublicKeyB64,
+    'BEGIN PUBLIC KEY',
+  );
+
   const auth = Buffer.from(`${privyAppId}:${privyAppSecret}`).toString('base64');
   const headers: Record<string, string> = {
     Authorization: `Basic ${auth}`,
@@ -95,7 +111,7 @@ async function exportPrivyWallet(walletId: string) {
     headers,
     body: JSON.stringify({
       encryption_type: 'HPKE',
-      recipient_public_key: privyHpkePublicKeyB64,
+      recipient_public_key: recipientPublicKeyDerBase64,
     }),
   });
 
