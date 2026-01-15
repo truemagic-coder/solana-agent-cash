@@ -138,7 +138,7 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.post('/private-transfer', requireApiKey, async (req, res) => {
+app.post('/transfer', requireApiKey, async (req, res) => {
   try {
     const { walletId, amount, recipient } = req.body as {
       walletId?: string;
@@ -183,6 +183,128 @@ app.post('/private-transfer', requireApiKey, async (req, res) => {
       status: 'ok',
       deposit: depositRes,
       withdraw: withdrawRes,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unexpected error';
+    return res.status(500).json({ error: message });
+  }
+});
+
+app.post('/deposit', requireApiKey, async (req, res) => {
+  try {
+    const { walletId, amount } = req.body as {
+      walletId?: string;
+      amount?: number;
+    };
+
+    if (!walletId || typeof amount !== 'number') {
+      return res.status(400).json({ error: 'walletId, amount required' });
+    }
+
+    if (!solanaRpcUrl) {
+      return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
+    }
+
+    if (amount <= 0) {
+      return res.status(400).json({ error: 'amount must be > 0' });
+    }
+
+    const exportPayload = await exportPrivyWallet(walletId);
+    const privateKey = await decryptPrivyWalletPrivateKey(exportPayload);
+
+    const client = new PrivacyCash({
+      RPC_url: solanaRpcUrl,
+      owner: privateKey,
+    });
+
+    const depositRes = await client.depositSPL({
+      amount,
+      mintAddress: USDC_MINT,
+    });
+
+    return res.json({
+      status: 'ok',
+      deposit: depositRes,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unexpected error';
+    return res.status(500).json({ error: message });
+  }
+});
+
+app.post('/withdrawl', requireApiKey, async (req, res) => {
+  try {
+    const { walletId, amount, recipient } = req.body as {
+      walletId?: string;
+      amount?: number;
+      recipient?: string;
+    };
+
+    if (!walletId || !recipient || typeof amount !== 'number') {
+      return res.status(400).json({ error: 'walletId, amount, recipient required' });
+    }
+
+    if (!solanaRpcUrl) {
+      return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
+    }
+
+    if (amount <= 0) {
+      return res.status(400).json({ error: 'amount must be > 0' });
+    }
+
+    const recipientKey = new PublicKey(recipient);
+
+    const exportPayload = await exportPrivyWallet(walletId);
+    const privateKey = await decryptPrivyWalletPrivateKey(exportPayload);
+
+    const client = new PrivacyCash({
+      RPC_url: solanaRpcUrl,
+      owner: privateKey,
+    });
+
+    const withdrawRes = await client.withdrawSPL({
+      amount,
+      mintAddress: USDC_MINT,
+      recipientAddress: recipientKey.toBase58(),
+    });
+
+    return res.json({
+      status: 'ok',
+      withdraw: withdrawRes,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unexpected error';
+    return res.status(500).json({ error: message });
+  }
+});
+
+app.post('/balance', requireApiKey, async (req, res) => {
+  try {
+    const { walletId } = req.body as {
+      walletId?: string;
+    };
+
+    if (!walletId) {
+      return res.status(400).json({ error: 'walletId required' });
+    }
+
+    if (!solanaRpcUrl) {
+      return res.status(500).json({ error: 'SOLANA_RPC_URL not configured' });
+    }
+
+    const exportPayload = await exportPrivyWallet(walletId);
+    const privateKey = await decryptPrivyWalletPrivateKey(exportPayload);
+
+    const client = new PrivacyCash({
+      RPC_url: solanaRpcUrl,
+      owner: privateKey,
+    });
+
+    const balance = await client.getPrivateBalanceSpl(USDC_MINT);
+
+    return res.json({
+      status: 'ok',
+      balance,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error';

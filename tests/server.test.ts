@@ -15,22 +15,22 @@ describe('server', () => {
     expect(res.body).toEqual({ status: 'ok' });
   });
 
-  it('POST /private-transfer requires api key', async () => {
+  it('POST /transfer requires api key', async () => {
     delete process.env.API_KEY;
     const app = await loadApp();
     const res = await request(app)
-      .post('/private-transfer')
+      .post('/transfer')
       .send({ walletId: 'test', amount: 1, recipient: 'test' });
 
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: 'API key not configured' });
   });
 
-  it('POST /private-transfer rejects missing fields', async () => {
+  it('POST /transfer rejects missing fields', async () => {
     process.env.API_KEY = 'test-key';
     const app = await loadApp();
     const res = await request(app)
-      .post('/private-transfer')
+      .post('/transfer')
       .set('Authorization', 'Bearer test-key')
       .send({ amount: 1, recipient: 'test' });
 

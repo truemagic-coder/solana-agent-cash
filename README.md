@@ -73,7 +73,7 @@ Response:
 
 ### Private USDC transfer
 
-`POST /private-transfer`
+`POST /transfer`
 
 Headers:
 
@@ -97,6 +97,95 @@ Response (success):
 	"status": "ok",
 	"deposit": { "...": "..." },
 	"withdraw": { "...": "..." }
+}
+```
+
+Notes: 
+
+* Privacy Cash charges 0.25% for withdrawls (happens in transfer)
+
+### Deposit USDC
+
+`POST /deposit`
+
+Headers:
+
+- `Authorization: Bearer <API_KEY>` **or**
+- `x-api-key: <API_KEY>`
+
+Body:
+
+```json
+{
+	"walletId": "privy_wallet_id",
+	"amount": 1.25
+}
+```
+
+Response (success):
+
+```json
+{
+	"status": "ok",
+	"deposit": { "...": "..." }
+}
+```
+
+### Withdraw USDC
+
+`POST /withdrawl`
+
+Headers:
+
+- `Authorization: Bearer <API_KEY>` **or**
+- `x-api-key: <API_KEY>`
+
+Body:
+
+```json
+{
+	"walletId": "privy_wallet_id",
+	"amount": 1.25,
+	"recipient": "solana_public_key"
+}
+```
+
+Notes: 
+
+* Privacy Cash charges 0.25% for withdrawls
+
+Response (success):
+
+```json
+{
+	"status": "ok",
+	"withdraw": { "...": "..." }
+}
+```
+
+### USDC private balance
+
+`POST /balance`
+
+Headers:
+
+- `Authorization: Bearer <API_KEY>` **or**
+- `x-api-key: <API_KEY>`
+
+Body:
+
+```json
+{
+	"walletId": "privy_wallet_id"
+}
+```
+
+Response (success):
+
+```json
+{
+	"status": "ok",
+	"balance": { "...": "..." }
 }
 ```
 
