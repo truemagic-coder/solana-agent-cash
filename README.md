@@ -1,15 +1,6 @@
 # Solana Agent Privacy Cash API
 
-Turn-key Express + TypeScript API for initiating a **private USDC transfer** using Privy wallet export and the Privacy Cash SDK.
-
-## What it does
-
-The API:
-
-1. Exports a Privy wallet private key using HPKE.
-2. Decrypts the export using your HPKE private key.
-3. Uses Privacy Cash SDK to deposit USDC into the private pool.
-4. Withdraws USDC to a recipient Solana public key.
+Turn-key Express + TypeScript API for using Privy wallet export and the Privacy Cash SDK.
 
 ## Requirements
 
@@ -71,7 +62,7 @@ Response:
 { "status": "ok" }
 ```
 
-### Private USDC transfer
+### Transfer USDC
 
 `POST /transfer`
 
