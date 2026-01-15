@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { webcrypto } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { PrivacyCash } from 'privacycash';
 import BigNumber from 'bignumber.js';
 import { CipherSuite, DhkemP256HkdfSha256, HkdfSha256 } from '@hpke/core';
@@ -13,7 +13,6 @@ export const app = express();
 app.use(express.json());
 
 const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-const LAMPORTS_PER_SOL = 1_000_000_000;
 
 const apiKey = process.env.API_KEY;
 const privyAppId = process.env.PRIVY_APP_ID;
