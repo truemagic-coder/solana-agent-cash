@@ -35,6 +35,50 @@ describe('server', () => {
       .send({ amount: 1, recipient: 'test' });
 
     expect(res.status).toBe(400);
-    expect(res.body).toEqual({ error: 'walletId, amount, recipient required' });
+    expect(res.body).toEqual({
+      error: "walletId, amount, recipient, token ('SOL' | 'USDC') required",
+    });
+  });
+
+  it('POST /deposit rejects missing fields', async () => {
+    process.env.API_KEY = 'test-key';
+    const app = await loadApp();
+    const res = await request(app)
+      .post('/deposit')
+      .set('Authorization', 'Bearer test-key')
+      .send({ amount: 1 });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: "walletId, amount, token ('SOL' | 'USDC') required",
+    });
+  });
+
+  it('POST /withdrawl rejects missing fields', async () => {
+    process.env.API_KEY = 'test-key';
+    const app = await loadApp();
+    const res = await request(app)
+      .post('/withdrawl')
+      .set('Authorization', 'Bearer test-key')
+      .send({ walletId: 'test', amount: 1 });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: "walletId, amount, recipient, token ('SOL' | 'USDC') required",
+    });
+  });
+
+  it('POST /balance rejects missing fields', async () => {
+    process.env.API_KEY = 'test-key';
+    const app = await loadApp();
+    const res = await request(app)
+      .post('/balance')
+      .set('Authorization', 'Bearer test-key')
+      .send({ walletId: 'test' });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: "walletId, token ('SOL' | 'USDC') required",
+    });
   });
 });
