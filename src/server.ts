@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import morgan from 'morgan';
 import { fileURLToPath } from 'node:url';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { PrivacyCash } from 'privacycash';
@@ -9,6 +10,27 @@ import { PrivyClient } from '@privy-io/node';
 export const app = express();
 
 app.use(express.json());
+app.use(
+  morgan(
+    ':remote-addr - :method :url HTTP/:http-version :status :res[content-length] - :response-time ms ":user-agent"',
+  ),
+);
+app.use((req, _res, next) => {
+  const hasQuery = req.query && Object.keys(req.query).length > 0;
+  const hasBody = req.body && Object.keys(req.body).length > 0;
+
+  if (hasQuery || hasBody) {
+    // eslint-disable-next-line no-console
+    console.log('[request payload]', {
+      method: req.method,
+      path: req.originalUrl,
+      query: hasQuery ? req.query : undefined,
+      body: hasBody ? req.body : undefined,
+    });
+  }
+
+  next();
+});
 
 const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 
