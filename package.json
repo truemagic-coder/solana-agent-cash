@@ -14,28 +14,26 @@
   },
   "dependencies": {
     "@privy-io/node": "^0.7.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "morgan": "^1.10.1",
     "privacycash": "^1.1.10",
-    "bignumber.js": "^9.1.2",
-    "@hpke/chacha20poly1305": "^1.7.1",
-    "@hpke/core": "^1.7.5",
+    "bignumber.js": "^9.3.1",
     "@solana/web3.js": "^1.98.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^20.12.12",
-    "@types/supertest": "^2.0.16",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
+    "@types/node": "^25.0.9",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "supertest": "^6.3.4",
-    "tsx": "^4.7.2",
-    "typescript": "^5.4.5",
-    "vitest": "^2.1.0"
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.0",
+    "supertest": "^7.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
   }
 }

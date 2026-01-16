@@ -14,7 +14,7 @@ Turn-key Express + TypeScript API for using Privy wallet export and the Privacy 
 1) Install dependencies
 
 ```bash
-npm install
+yarn install
 ```
 
 2) Configure environment
