@@ -22,18 +22,16 @@ yarn install
 Copy `.env.example` to `.env` and set the values:
 
 ```text
-PORT=3000
 API_KEY=replace-me
 SOLANA_RPC_URL=https://your-solana-rpc
 PRIVY_APP_ID=your-privy-app-id
 PRIVY_APP_SECRET=your-privy-app-secret
-PRIVY_AUTHORIZATION_KEY=your-privy-authorization-key
 ```
 
 3) Run locally
 
 ```bash
-npm run dev
+yarn run dev
 ```
 
 ## API
@@ -176,20 +174,20 @@ Response (success):
 
 ## Scripts
 
-- `npm run dev` - start dev server with hot reload
-- `npm run build` - compile TypeScript to dist/
-- `npm start` - run compiled server
-- `npm run lint` - lint source
-- `npm run format` - format source
-- `npm run test` - run tests
-- `npm run test:watch` - watch tests
+- `yarn run dev` - start dev server with hot reload
+- `yarn run build` - compile TypeScript to dist/
+- `yarn start` - run compiled server
+- `yarn run lint` - lint source
+- `yarn run format` - format source
+- `yarn run test` - run tests
+- `yarn run test:watch` - watch tests
 
 ## Tests
 
 Run all tests:
 
 ```bash
-npm run test
+yarn run test
 ```
 
 ## Deployment (Dokku)
@@ -197,7 +195,7 @@ npm run test
 Ensure `.env` values are set in your Dokku config. A Procfile is included and runs:
 
 ```text
-web: npm run build && npm start
+web: npm start
 ```
 
 ## Security notes
