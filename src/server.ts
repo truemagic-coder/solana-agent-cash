@@ -10,9 +10,15 @@ import { PrivyClient } from '@privy-io/node';
 export const app = express();
 
 app.use(express.json());
+app.set('trust proxy', true);
 app.use(
   morgan(
     ':remote-addr - :method :url HTTP/:http-version :status :res[content-length] - :response-time ms ":user-agent"',
+    {
+      stream: {
+        write: (message: string) => process.stdout.write(message),
+      },
+    },
   ),
 );
 app.use((req, _res, next) => {
