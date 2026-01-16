@@ -35,6 +35,7 @@ const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 const apiKey = process.env.API_KEY;
 const privyAppId = process.env.PRIVY_APP_ID;
 const privyAppSecret = process.env.PRIVY_APP_SECRET;
+const privyAuthorizationKey = process.env.PRIVY_AUTHORIZATION_KEY;
 const solanaRpcUrl = process.env.SOLANA_RPC_URL;
 
 const privyClient = privyAppId && privyAppSecret
@@ -78,11 +79,15 @@ function requireApiKey(req: express.Request, res: express.Response, next: expres
 }
 
 async function exportPrivyWallet(walletId: string) {
-  if (!privyClient) {
+  if (!privyClient || !privyAuthorizationKey) {
     throw new Error('Privy export not configured');
   }
 
-  const { private_key } = await privyClient.wallets().export(walletId, {});
+  const { private_key } = await privyClient.wallets().export(walletId, {
+    authorization_context: {
+      authorization_private_keys: [privyAuthorizationKey],
+    },
+  });
 
   if (!private_key) {
     throw new Error('Privy export returned no private key');

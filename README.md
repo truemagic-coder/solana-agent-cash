@@ -26,6 +26,7 @@ API_KEY=replace-me
 SOLANA_RPC_URL=https://your-solana-rpc
 PRIVY_APP_ID=your-privy-app-id
 PRIVY_APP_SECRET=your-privy-app-secret
+PRIVY_AUTHORIZATION_KEY=your-privy-authorization-key
 ```
 
 3) Run locally
