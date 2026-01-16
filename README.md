@@ -6,8 +6,8 @@ Turn-key Express + TypeScript API for using Privy wallet export and the Privacy 
 
 - Node.js 20+
 - A Privy app with wallet export enabled
+- A Privy authorization key for wallet export
 - A Solana mainnet RPC URL
-- HPKE P‑256 keypair (DER SPKI public key + DER PKCS8 private key, base64)
 
 ## Quick start
 
@@ -27,24 +27,10 @@ API_KEY=replace-me
 SOLANA_RPC_URL=https://your-solana-rpc
 PRIVY_APP_ID=your-privy-app-id
 PRIVY_APP_SECRET=your-privy-app-secret
-PRIVY_AUTH_SIGNATURE=
-PRIVY_HPKE_PUBLIC_KEY_B64=base64-der-spki-public-key
-PRIVY_HPKE_PRIVATE_KEY_B64=base64-der-pkcs8-private-key
+PRIVY_AUTHORIZATION_KEY=your-privy-authorization-key
 ```
 
-3) Generate HPKE keys (optional)
-
-```bash
-node scripts/generate-privy-hpke-keys.js
-```
-
-Notes on HPKE key formats:
-
-- Recommended: base64 of DER SPKI public key and DER PKCS8 private key.
-- The generator also prints base64 of PEM for compatibility with Privy’s demo.
-- The server accepts either format and normalizes to DER internally.
-
-4) Run locally
+3) Run locally
 
 ```bash
 npm run dev

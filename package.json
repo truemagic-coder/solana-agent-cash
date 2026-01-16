@@ -13,6 +13,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@privy-io/node": "^0.7.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "privacycash": "^1.1.10",
