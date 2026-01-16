@@ -16,14 +16,14 @@
     "@privy-io/node": "^0.7.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "morgan": "^1.10.1",
+    "pino": "^10.2.0",
+    "pino-http": "^11.0.0",
     "privacycash": "^1.1.10",
     "bignumber.js": "^9.3.1",
     "@solana/web3.js": "^1.98.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.9",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
