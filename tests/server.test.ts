@@ -54,11 +54,11 @@ describe('server', () => {
     });
   });
 
-  it('POST /withdrawl rejects missing fields', async () => {
+  it('POST /withdraw rejects missing fields', async () => {
     process.env.API_KEY = 'test-key';
     const app = await loadApp();
     const res = await request(app)
-      .post('/withdrawl')
+      .post('/withdraw')
       .set('Authorization', 'Bearer test-key')
       .send({ walletId: 'test', amount: 1 });
 

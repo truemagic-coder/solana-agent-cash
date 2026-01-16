@@ -288,7 +288,7 @@ app.post('/deposit', requireApiKey, async (req, res) => {
   }
 });
 
-app.post('/withdrawl', requireApiKey, async (req, res) => {
+app.post('/withdraw', requireApiKey, async (req, res) => {
   try {
     const { walletId, amount, recipient, token } = req.body as {
       walletId?: string;

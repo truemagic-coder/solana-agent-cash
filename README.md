@@ -128,7 +128,7 @@ Response (success):
 
 ### Withdraw (SOL or USDC)
 
-`POST /withdrawl`
+`POST /withdraw`
 
 Headers:
 
