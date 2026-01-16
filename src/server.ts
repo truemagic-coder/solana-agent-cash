@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import pino from 'pino';
 import { pinoHttp } from 'pino-http';
-import { fileURLToPath } from 'node:url';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { PrivacyCash } from 'privacycash';
 import BigNumber from 'bignumber.js';
@@ -342,8 +341,9 @@ app.post('/balance', requireApiKey, async (req, res) => {
 
 const port = Number(process.env.PORT) || 3000;
 
-const isEntrypoint = process.argv[1] === fileURLToPath(import.meta.url);
-if (isEntrypoint) {
+const shouldStartServer = process.env.NODE_ENV !== 'test' && process.env.START_SERVER !== 'false';
+
+if (shouldStartServer) {
   app.listen(port, () => {
     // eslint-disable-next-line no-console
     console.log(`Server listening on http://localhost:${port}`);
